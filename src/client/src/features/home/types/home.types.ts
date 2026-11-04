@@ -1,0 +1,31 @@
+import type { ReportCategory, ReportMonth } from "@/features/reports";
+import type { TransactionDto } from "@/features/transactions";
+
+/** Mirrors backend HomeRequest; ISO dates. */
+export interface HomeRequest {
+  month: string;
+  asOf: string;
+}
+
+export interface HomePaceDay {
+  day: number;
+  spent: number | null;
+  usual: number | null;
+}
+
+/** Mirrors backend Home; money in major units. */
+export interface Home {
+  from: string;
+  to: string;
+  usualWindows: number;
+  income: number;
+  expenses: number;
+  usualIncome: number | null;
+  usualExpenses: number | null;
+  invested: number;
+  investedAccounts: number;
+  categories: ReportCategory[];
+  months: ReportMonth[];
+  pace: HomePaceDay[];
+  recent: TransactionDto[];
+}

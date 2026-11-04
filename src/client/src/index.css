@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  /* Type scale (PocketLedger spec §4): text-page, text-section, text-card, text-kpi, text-label */
+  --text-page: 1.625rem;
+  --text-section: 1rem;
+  --text-card: 0.8125rem;
+  --text-kpi: 1.75rem;
+  --text-label: 0.6875rem;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-field: var(--field);
+  --color-field-focus: var(--field-focus);
+  --color-surface: var(--surface);
+  --color-top: var(--top);
+  --color-drawer: var(--drawer);
+  --color-overlay: var(--overlay);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-faint-foreground: var(--faint-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-hover-foreground: var(--sidebar-hover-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-card: var(--card-shadow);
+
+  /* Buttons/inputs use rounded-lg (9px); cards use rounded-xl (14px). */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: 0.875rem;
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --radius: 0.5625rem;
+
+  --background: #F3F5FA;
+  --foreground: #172033;
+  --card: #FFFFFF;
+  --card-foreground: #172033;
+  --popover: #FFFFFF;
+  --popover-foreground: #172033;
+
+  --primary: #4169F5;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #3155D7;
+
+  --secondary: #EDF1F7;
+  --secondary-foreground: #172033;
+  --muted: #EDF1F7;
+  --muted-foreground: #69768C;
+  /* ~3:1 on white — placeholders and decoration only, never essential text. */
+  --faint-foreground: #8995A8;
+  /* Primary soft: selected/highlighted items. */
+  --accent: #EEF3FF;
+  --accent-foreground: #3155D7;
+
+  --destructive: #D6535C;
+  --destructive-subtle: #FCEDEF;
+  --success: #168765;
+  --success-subtle: #E8F6F0;
+  --warning: #BD8125;
+  --warning-subtle: #FFF5E5;
+
+  --border: #E5EAF2;
+  /* Input border */
+  --input: #DCE3EF;
+  --ring: #4169F5;
+
+  /* Surfaces: secondary (table heads), top bar, drawer, inputs, backdrop. */
+  --surface: #F8FAFD;
+  --top: #FFFFFF;
+  --drawer: #FFFFFF;
+  --field: #FFFFFF;
+  --field-focus: #F5F7FF;
+  --overlay: rgba(17, 28, 51, 0.32);
+
+  /* Income, expenses/needs, investments, wants, other */
+  --chart-1: #4169F5;
+  --chart-2: #19A17A;
+  --chart-3: #8B78D8;
+  --chart-4: #E9A23B;
+  --chart-5: #8B95A8;
+
+  /* Navy sidebar in both modes. */
+  --sidebar: #111C33;
+  --sidebar-foreground: #C4D0E8;
+  --sidebar-primary: #4169F5;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #293D68;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-hover: #1C2A47;
+  --sidebar-hover-foreground: #FFFFFF;
+  --sidebar-border: #1E2A44;
+  --sidebar-ring: #4169F5;
+
+  --card-shadow: 0 4px 17px rgba(23, 32, 51, 0.03);
+}
+
+.dark {
+  --background: #0B1220;
+  --foreground: #EDF2FB;
+  --card: #151F32;
+  --card-foreground: #EDF2FB;
+  --popover: #1B2940;
+  --popover-foreground: #EDF2FB;
+
+  --primary: #4169F5;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #6D89FF;
+
+  --secondary: #1B2940;
+  --secondary-foreground: #EDF2FB;
+  --muted: #1B2940;
+  --muted-foreground: #AAB6CA;
+  --faint-foreground: #8290A8;
+  --accent: #24365E;
+  --accent-foreground: #B4C5FF;
+
+  --destructive: #F17C82;
+  --destructive-subtle: #47282E;
+  --success: #45C79A;
+  --success-subtle: #173D35;
+  --warning: #EFB95F;
+  --warning-subtle: #44351F;
+
+  --border: #293750;
+  --input: #35445E;
+  --ring: #6685FF;
+
+  --surface: #1B2940;
+  --top: #121C2D;
+  --drawer: #17243A;
+  --field: #1B2940;
+  --field-focus: #1E2D47;
+  --overlay: rgba(3, 7, 15, 0.62);
+
+  --chart-1: #7890FF;
+  --chart-2: #42C69A;
+  --chart-3: #A595F0;
+  --chart-4: #F0B65C;
+  --chart-5: #A5B0C2;
+
+  --sidebar: #101A2C;
+  --sidebar-foreground: #C4D0E8;
+  --sidebar-primary: #4169F5;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #293D68;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-hover: #1A263D;
+  --sidebar-hover-foreground: #FFFFFF;
+  --sidebar-border: #1E2A40;
+  --sidebar-ring: #6685FF;
+
+  --card-shadow: 0 18px 55px rgba(0, 0, 0, 0.25);
+}
+
+@layer base {
+  :root { color-scheme: light; }
+  .dark { color-scheme: dark; }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-sm text-foreground;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+}
+
+/* Density preference: tighter table rows when compact. */
+html[data-density="compact"] [data-slot="table-cell"] {
+  padding-block: 0.25rem;
+}
+
+/* Login page: slow drift for the decorative sample cards (used with motion-safe:). */
+@theme {
+  --animate-float: float 7s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}

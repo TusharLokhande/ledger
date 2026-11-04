@@ -1,0 +1,9 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ledger;Username=ledger;Password=ledger",
+    "BlobStorage": "UseDevelopmentStorage=true"
+  },
+  "Jwt": {
+    "SigningKey": "replace-with-a-long-random-secret"
+  }
+}
