@@ -3,6 +3,7 @@ export const accountTypeOptions = [
   { value: "Cash", label: "Cash" },
   { value: "CreditCard", label: "Credit Card" },
   { value: "Investment", label: "Investment" },
+  { value: "EmergencyFund", label: "Emergency Fund" },
 ] as const;
 
 export const accountTypeLabel = Object.fromEntries(accountTypeOptions.map((o) => [o.value, o.label])) as Record<

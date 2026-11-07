@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import type { ColumnFiltersState, OnChangeFn, PaginationState, SortingState, Updater } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { format, isValid, parse } from "date-fns";
 import { FileSpreadsheet, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/ui/button";
@@ -27,7 +27,14 @@ function resolve<T>(updater: Updater<T>, previous: T): T {
 }
 
 export function TransactionsPage() {
-  const [period, setPeriod] = useState<PeriodRange>({ period: "1", from: null, to: null });
+  const [searchParams] = useSearchParams();
+  // `?from=&to=` (e.g. from the Home calendar) opens on that custom range.
+  const [period, setPeriod] = useState<PeriodRange>(() => {
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+    const isDate = (s: string | null): s is string => !!s && isValid(parse(s, "yyyy-MM-dd", new Date()));
+    return isDate(from) && isDate(to) && from <= to ? { period: "custom", from, to } : { period: "1", from: null, to: null };
+  });
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

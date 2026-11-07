@@ -7,4 +7,5 @@ namespace Core.Features.Home.Interfaces;
 public interface IHomeService
 {
     Task<Result<HomeDto>> GetAsync(HomeRequest request, CancellationToken cancellationToken = default);
+    Task<Result<List<HomeCalendarDayDto>>> GetCalendarAsync(HomeCalendarRequest request, CancellationToken cancellationToken = default);
 }

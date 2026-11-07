@@ -31,6 +31,19 @@ export function formatCurrency(minorUnits: number): string {
   return getFormatter().format(minorUnits / minorUnitsPerMajor());
 }
 
+const compactFormatters = new Map<string, Intl.NumberFormat>();
+
+/** Short form for tight spaces, e.g. 185000 -> "₹1.9K" for INR. */
+export function formatCompactCurrency(minorUnits: number): string {
+  const code = getFormatter().resolvedOptions().currency ?? FALLBACK_CURRENCY;
+  let formatter = compactFormatters.get(code);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(LOCALE, { style: "currency", currency: code, notation: "compact", maximumFractionDigits: 1 });
+    compactFormatters.set(code, formatter);
+  }
+  return formatter.format(minorUnits / minorUnitsPerMajor());
+}
+
 /** Converts a major-unit amount (as entered in a form) to minor units for the API. */
 export function toMinorUnits(majorUnits: number): number {
   return Math.round(majorUnits * minorUnitsPerMajor());

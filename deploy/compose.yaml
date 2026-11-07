@@ -1,0 +1,62 @@
+# PocketLedger production stack. Lives in /opt/apps/pocket-ledger; CI copies this file there.
+# Secrets come from .env next to it (template: .env.example).
+services:
+  client:
+    image: ghcr.io/tusharlokhande/pocketledger-client:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks: [default, proxy]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.pocketledger-client.rule=Host(`ledger.efficanova.com`)
+      - traefik.http.routers.pocketledger-client.entrypoints=websecure
+      - traefik.http.routers.pocketledger-client.tls.certresolver=letsencrypt
+      - traefik.http.services.pocketledger-client.loadbalancer.server.port=80
+    depends_on: [api]
+
+  api:
+    image: ghcr.io/tusharlokhande/pocketledger-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file: .env
+    networks: [default, proxy, observability]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.pocketledger-api.rule=Host(`ledger.efficanova.com`) && PathPrefix(`/api`)
+      - traefik.http.routers.pocketledger-api.entrypoints=websecure
+      - traefik.http.routers.pocketledger-api.tls.certresolver=letsencrypt
+      - traefik.http.services.pocketledger-api.loadbalancer.server.port=8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    restart: unless-stopped
+    command: azurite-blob --blobHost 0.0.0.0 --location /data --skipApiVersionCheck
+    environment:
+      AZURITE_ACCOUNTS: ${AZURITE_ACCOUNTS}
+    volumes:
+      - ./data/azurite:/data
+
+networks:
+  proxy:
+    external: true
+  observability:
+    external: true

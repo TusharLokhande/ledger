@@ -4,11 +4,11 @@ import { ArrowRight, MoreHorizontal } from "lucide-react";
 import { Button } from "@/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { formatCurrency, toMinorUnits } from "@/lib/currency";
 import type { DataTableFilterOption } from "@/components/data-table";
 import { CategoryIcon } from "@/features/categories";
 import { transactionTypeOptions } from "@/features/transactions/constants/transactionTypes";
 import type { TransactionDto } from "@/features/transactions/types/transaction.types";
+import { AmountCell } from "@/features/transactions/components/AmountCell";
 
 interface TransactionColumnOptions {
   accountOptions: DataTableFilterOption[];
@@ -95,17 +95,7 @@ export function getTransactionColumns({ accountOptions, categoryOptions, onEdit,
       accessorKey: "amount",
       header: "Amount",
       meta: { label: "Amount", filterVariant: "number", align: "right" },
-      cell: ({ row }) => (
-        <span
-          className={cn(
-            "block text-right font-medium whitespace-nowrap tabular-nums",
-            row.original.transactionType === "Income" && "text-success",
-            row.original.transactionType === "Transfer" && "text-muted-foreground",
-          )}
-        >
-          {formatCurrency(toMinorUnits(row.original.amount))}
-        </span>
-      ),
+      cell: ({ row }) => <AmountCell transaction={row.original} />,
     },
     {
       id: "actions",

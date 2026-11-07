@@ -12,5 +12,7 @@ public class CreateAccountRequestValidator : AbstractValidator<CreateAccountRequ
         RuleFor(x => x.AccountType).IsInEnum();
         RuleFor(x => x.Institution).Must(i => i == null || i.Trim().Length <= 100)
             .WithMessage("Institution must be 100 characters or fewer.");
+        RuleFor(x => x.OpeningBalance).InclusiveBetween(0, 999_999_999_999).When(x => x.OpeningBalance.HasValue)
+            .WithMessage("Already saved must be between 0 and 999,999,999,999.");
     }
 }

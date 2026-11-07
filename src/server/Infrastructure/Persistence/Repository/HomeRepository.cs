@@ -24,6 +24,42 @@ public class HomeRepository : Repository<Transactions>, IHomeRepository
         return (rows.Sum(r => r.Amount), rows.Select(r => r.DestinationAccountId).Distinct().Count());
     }
 
+    public async Task<(decimal Saved, decimal Added, decimal Used)?> EmergencyFundAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        var openings = await _context.Accounts.AsNoTracking()
+            .Where(a => a.UserId == userId && a.AccountType == AccountType.EmergencyFund)
+            .Select(a => a.OpeningBalance ?? 0)
+            .ToListAsync(cancellationToken);
+        if (openings.Count == 0)
+            return null;
+
+        // Money in: income credited to the fund, or a transfer into it. Money out: an expense or transfer from it.
+        // Fund-to-fund transfers move nothing in or out, so they're skipped.
+        var rows = await _dbSet.AsNoTracking()
+            .Where(t => t.UserId == userId && t.TransactionDate <= to
+                        && (t.Account.AccountType == AccountType.EmergencyFund
+                            || (t.TransactionType == TransactionType.Transfer && t.DestinationAccount!.AccountType == AccountType.EmergencyFund)))
+            .Select(t => new
+            {
+                t.TransactionDate,
+                t.Amount,
+                t.TransactionType,
+                FromFund = t.Account.AccountType == AccountType.EmergencyFund,
+                ToFund = t.TransactionType == TransactionType.Transfer && t.DestinationAccount!.AccountType == AccountType.EmergencyFund
+            })
+            .ToListAsync(cancellationToken);
+
+        decimal saved = openings.Sum(), added = 0, used = 0;
+        foreach (var r in rows.Where(r => !(r.FromFund && r.ToFund)))
+        {
+            var isIn = !r.FromFund || r.TransactionType == TransactionType.Income;
+            saved += isIn ? r.Amount : -r.Amount;
+            if (r.TransactionDate < from) continue;
+            if (isIn) added += r.Amount; else used += r.Amount;
+        }
+        return (saved, added, used);
+    }
+
     public Task<List<TransactionDto>> RecentAsync(Guid userId, DateOnly from, DateOnly to, int take, CancellationToken cancellationToken = default)
         => _dbSet.AsNoTracking()
             .Where(t => t.UserId == userId && t.TransactionDate >= from && t.TransactionDate <= to)

@@ -3,6 +3,8 @@ import { ArrowDown, ArrowDownLeft, ArrowUp, ArrowUpRight, Scale, type LucideIcon
 import { cn } from "@/lib/utils";
 import { formatCurrency, toMinorUnits } from "@/lib/currency";
 import { Skeleton } from "@/ui/skeleton";
+import { HideIncomeToggle } from "@/components/HideIncomeToggle";
+import { HIDDEN_AMOUNT, usePrivacyStore } from "@/store/privacyStore";
 import type { TransactionSummary } from "@/features/transactions/types/transaction.types";
 
 type Metric = "income" | "expenses" | "net";
@@ -23,6 +25,7 @@ function change(current: number, previous: number | undefined): number | null {
 }
 
 export function SummaryCards({ summary, isLoading }: { summary?: TransactionSummary; isLoading: boolean }) {
+  const hideIncome = usePrivacyStore((s) => s.hideIncome);
   const range =
     summary?.previousFrom && summary.previousTo
       ? `${format(parseISO(summary.previousFrom), "d MMM yyyy")} – ${format(parseISO(summary.previousTo), "d MMM yyyy")}`
@@ -38,7 +41,10 @@ export function SummaryCards({ summary, isLoading }: { summary?: TransactionSumm
         return (
           <div key={metric} className="rounded-xl border border-border bg-card p-4 shadow-card">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium text-muted-foreground">{labels[metric]}</p>
+              <p className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                {labels[metric]}
+                {metric === "income" && <HideIncomeToggle />}
+              </p>
               <span className={cn("flex size-7 items-center justify-center rounded-lg", iconTone[metric])}>
                 <Icon className="size-4" aria-hidden="true" />
               </span>
@@ -47,7 +53,7 @@ export function SummaryCards({ summary, isLoading }: { summary?: TransactionSumm
               <Skeleton className="mt-2 h-7 w-32" />
             ) : (
               <p className={cn("mt-1 text-2xl font-semibold tracking-tight tabular-nums", metric === "net" && value < 0 ? "text-destructive" : "text-card-foreground")}>
-                {formatCurrency(toMinorUnits(value))}
+                {metric === "income" && hideIncome ? HIDDEN_AMOUNT : formatCurrency(toMinorUnits(value))}
               </p>
             )}
             <p className="mt-1 text-xs text-muted-foreground" title={range ? `Compared with ${range}` : undefined}>

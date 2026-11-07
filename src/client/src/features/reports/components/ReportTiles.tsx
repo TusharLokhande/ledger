@@ -1,6 +1,8 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/ui/skeleton";
+import { HideIncomeToggle } from "@/components/HideIncomeToggle";
+import { HIDDEN_AMOUNT, usePrivacyStore } from "@/store/privacyStore";
 import { money, pctChange, savingsRate } from "@/features/reports/components/reportMath";
 import type { Report } from "@/features/reports/types/report.types";
 
@@ -12,7 +14,7 @@ interface Tile {
   change: { text: string; up: boolean; good: boolean; flat: boolean } | null;
 }
 
-function tiles(r: Report): Tile[] {
+function tiles(r: Report, hideIncome: boolean): Tile[] {
   const net = r.income - r.expenses;
   const usualNet = r.usualIncome !== null && r.usualExpenses !== null ? r.usualIncome - r.usualExpenses : null;
   const rate = savingsRate(r.income, r.expenses);
@@ -26,7 +28,7 @@ function tiles(r: Report): Tile[] {
   const points = rate !== null && usualRate !== null ? rate - usualRate : null;
 
   return [
-    { label: "Income", value: money(r.income), change: pct(r.income, r.usualIncome, true) },
+    { label: "Income", value: hideIncome ? HIDDEN_AMOUNT : money(r.income), change: pct(r.income, r.usualIncome, true) },
     { label: "Expenses", value: money(r.expenses), change: pct(r.expenses, r.usualExpenses, false) },
     { label: "Net saved", value: money(net), negative: net < 0, change: pct(net, usualNet, true) },
     {
@@ -39,6 +41,7 @@ function tiles(r: Report): Tile[] {
 }
 
 export function ReportTiles({ report, isLoading }: { report?: Report; isLoading: boolean }) {
+  const hideIncome = usePrivacyStore((s) => s.hideIncome);
   if (!report) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -54,9 +57,12 @@ export function ReportTiles({ report, isLoading }: { report?: Report; isLoading:
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {tiles(report).map((t) => (
+      {tiles(report, hideIncome).map((t) => (
         <div key={t.label} className="rounded-xl border border-border bg-card p-4 shadow-card">
-          <p className="text-sm font-medium text-muted-foreground">{t.label}</p>
+          <p className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+            {t.label}
+            {t.label === "Income" && <HideIncomeToggle />}
+          </p>
           <p className={cn("mt-1 text-2xl font-semibold tracking-tight tabular-nums", t.negative ? "text-destructive" : "text-card-foreground")}>
             {t.value}
           </p>

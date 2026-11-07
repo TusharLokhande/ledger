@@ -63,8 +63,9 @@ Users 1─* Transactions
 |---------------|-----------|-------|
 | `UserId`      | `Guid`    | FK → Users |
 | `Name`        | `string`  | required |
-| `AccountType` | `AccountType` | `Bank` / `Cash` / `CreditCard` / `Investment` |
+| `AccountType` | `AccountType` | `Bank` / `Cash` / `CreditCard` / `Investment` / `EmergencyFund` |
 | `Institution` | `string?` | max 100; blank stored as null |
+| `OpeningBalance` | `decimal?` | (18,4); money already in the account before tracking. Kept only for `EmergencyFund` (null otherwise); added to Home's emergency-fund total |
 
 Unique index `(UserId, Name)`; the service also rejects case-insensitive duplicates (archived included).
 Archive = `Active = false`. Hard delete is allowed only while no transaction references the account
@@ -128,7 +129,7 @@ excluded from income/expense totals. Transactions are hard-deleted (nothing refe
 
 | Enum              | Values |
 |-------------------|--------|
-| `AccountType`     | `Bank = 1`, `Cash = 2`, `CreditCard = 3`, `Investment = 4` |
+| `AccountType`     | `Bank = 1`, `Cash = 2`, `CreditCard = 3`, `Investment = 4`, `EmergencyFund = 5` |
 | `CategoryType`    | `Income = 1`, `Expense = 2` |
 | `ImportStatus`    | `Queued = 1`, `Processing = 2`, `Succeeded = 3`, `Failed = 4` |
 | `TransactionType` | `Income = 1`, `Expense = 2`, `Transfer = 3` |

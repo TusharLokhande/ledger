@@ -25,24 +25,24 @@ services:
     volumes:
       - azurite-data:/data
 
-  api:
-    build: .
-    depends_on:
-      postgres:
-        condition: service_healthy
-      azurite:
-        condition: service_started
-    environment:
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ledger;Username=ledger;Password=ledger
-      ConnectionStrings__BlobStorage: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
-      Jwt__SigningKey: ${JWT_SIGNING_KEY:-local-dev-only-signing-key-change-me-0123456789}
-      Cors__AllowedOrigins__0: http://localhost:5173
-      Google__ClientId: ${GOOGLE_CLIENT_ID:-}
-      Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
-      Google__RedirectUri: http://localhost:5106/api/auth/google/callback
-      Client__BaseUrl: http://localhost:5173
-    ports:
-      - "5106:8080"
+  # api:
+  #   build: .
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     azurite:
+  #       condition: service_started
+  #   environment:
+  #     ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ledger;Username=ledger;Password=ledger
+  #     ConnectionStrings__BlobStorage: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+  #     Jwt__SigningKey: ${JWT_SIGNING_KEY:-local-dev-only-signing-key-change-me-0123456789}
+  #     Cors__AllowedOrigins__0: http://localhost:5173
+  #     Google__ClientId: ${GOOGLE_CLIENT_ID:-}
+  #     Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+  #     Google__RedirectUri: http://localhost:5106/api/auth/google/callback
+  #     Client__BaseUrl: http://localhost:5173
+  #   ports:
+  #     - "5106:8080"
 
 volumes:
   postgres-data:

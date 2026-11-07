@@ -5,6 +5,7 @@ using Core.Features.Accounts.Dto;
 using Core.Features.Accounts.Interfaces;
 using Core.Features.Accounts.Requests;
 using Core.Interfaces.UnitOfWork;
+using Domain.Enums;
 using Mapster;
 using AccountEntity = Domain.Entity.Accounts;
 
@@ -72,6 +73,7 @@ public class AccountService : IAccountService
             Name = name,
             AccountType = request.AccountType,
             Institution = NormalizeInstitution(request.Institution),
+            OpeningBalance = OpeningBalanceFor(request.AccountType, request.OpeningBalance),
             CreatedBy = UserId,
         };
         await _accounts.AddAsync(account, cancellationToken);
@@ -92,6 +94,7 @@ public class AccountService : IAccountService
         account.Name = name;
         account.AccountType = request.AccountType;
         account.Institution = NormalizeInstitution(request.Institution);
+        account.OpeningBalance = OpeningBalanceFor(request.AccountType, request.OpeningBalance);
         Touch(account);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<AccountDto>.Success(account.Adapt<AccountDto>());
@@ -133,4 +136,7 @@ public class AccountService : IAccountService
 
     private static string? NormalizeInstitution(string? institution)
         => string.IsNullOrWhiteSpace(institution) ? null : institution.Trim();
+
+    private static decimal? OpeningBalanceFor(AccountType type, decimal? openingBalance)
+        => type == AccountType.EmergencyFund && openingBalance > 0 ? openingBalance : null;
 }

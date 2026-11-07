@@ -10,4 +10,6 @@ public class Accounts : BaseEntity
     public string Name { get; set; } = string.Empty;
     public AccountType AccountType { get; set; }
     public string? Institution { get; set; }
+    /// <summary>Money already in the account before tracking began. Only kept for emergency-fund accounts.</summary>
+    public decimal? OpeningBalance { get; set; }
 }

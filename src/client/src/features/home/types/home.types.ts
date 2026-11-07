@@ -24,8 +24,22 @@ export interface Home {
   usualExpenses: number | null;
   invested: number;
   investedAccounts: number;
+  /** Null when the user has no Emergency Fund account. */
+  emergencyFund: { saved: number; added: number; used: number } | null;
   categories: ReportCategory[];
   months: ReportMonth[];
   pace: HomePaceDay[];
   recent: TransactionDto[];
+}
+
+/** Mirrors backend HomeCalendarRequest; ISO date in the month. */
+export interface HomeCalendarRequest {
+  month: string;
+}
+
+/** Mirrors backend HomeCalendarDayDto; money in major units. */
+export interface HomeCalendarDay {
+  date: string;
+  income: number;
+  expense: number;
 }

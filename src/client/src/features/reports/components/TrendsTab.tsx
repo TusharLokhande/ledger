@@ -4,6 +4,7 @@ import { Bar, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/ui/chart";
 import { SectionCard } from "@/components/SectionCard";
 import { money, savingsRate } from "@/features/reports/components/reportMath";
+import { usePrivacyStore } from "@/store/privacyStore";
 import type { Report } from "@/features/reports/types/report.types";
 
 const config = {
@@ -23,6 +24,7 @@ export function TrendsTab({
   subtitle?: ReactNode;
   action?: ReactNode;
 }) {
+  const hideIncome = usePrivacyStore((s) => s.hideIncome);
   const data = report.months.map((m) => ({
     label: format(parseISO(m.month), "MMM yy"),
     income: m.income,
@@ -53,7 +55,7 @@ export function TrendsTab({
             }
           />
           <ChartLegend content={<ChartLegendContent />} />
-          <Bar yAxisId="money" dataKey="income" fill="var(--color-income)" radius={[3, 3, 0, 0]} />
+          {!hideIncome && <Bar yAxisId="money" dataKey="income" fill="var(--color-income)" radius={[3, 3, 0, 0]} />}
           <Bar yAxisId="money" dataKey="expenses" fill="var(--color-expenses)" radius={[3, 3, 0, 0]} />
           <Line yAxisId="rate" dataKey="rate" type="monotone" stroke="var(--color-rate)" strokeWidth={2} dot={{ r: 3 }} connectNulls={false} />
         </ComposedChart>

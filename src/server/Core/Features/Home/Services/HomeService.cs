@@ -67,11 +67,34 @@ public class HomeService : IHomeService
             .ToList();
 
         var (invested, accounts) = await _home.InvestedAsync(UserId, monthStart, monthEnd, cancellationToken);
+        var fund = await _home.EmergencyFundAsync(UserId, monthStart, monthEnd, cancellationToken);
         var recent = await _home.RecentAsync(UserId, monthStart, monthEnd, RecentCount, cancellationToken);
 
         var r = report.Data!;
         return Result<HomeDto>.Success(new HomeDto(
             r.From, r.To, r.UsualWindows, r.Income, r.Expenses, r.UsualIncome, r.UsualExpenses,
-            invested, accounts, r.Categories, r.Months, pace, recent));
+            invested, accounts, fund is { } ef ? new HomeEmergencyFundDto(ef.Saved, ef.Added, ef.Used) : null, r.Categories, r.Months, pace, recent));
+    }
+
+    public async Task<Result<List<HomeCalendarDayDto>>> GetCalendarAsync(HomeCalendarRequest request, CancellationToken cancellationToken = default)
+    {
+        var monthStart = new DateOnly(request.Month.Year, request.Month.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        var byDay = (await _reportRepository.DailyTotalsAsync(UserId, monthStart, monthEnd, cancellationToken))
+            .ToLookup(d => d.Date);
+
+        var days = Enumerable.Range(0, monthEnd.Day)
+            .Select(i =>
+            {
+                var day = monthStart.AddDays(i);
+                var rows = byDay[day];
+                return new HomeCalendarDayDto(
+                    day,
+                    rows.Where(r => r.Type == TransactionType.Income).Sum(r => r.Amount),
+                    rows.Where(r => r.Type == TransactionType.Expense).Sum(r => r.Amount));
+            })
+            .ToList();
+
+        return Result<List<HomeCalendarDayDto>>.Success(days);
     }
 }

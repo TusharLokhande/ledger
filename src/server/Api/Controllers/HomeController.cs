@@ -21,4 +21,8 @@ public class HomeController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Get(HomeRequest request, CancellationToken cancellationToken)
         => (await _service.GetAsync(request, cancellationToken)).ToActionResult();
+
+    [HttpPost("calendar")]
+    public async Task<IActionResult> Calendar(HomeCalendarRequest request, CancellationToken cancellationToken)
+        => (await _service.GetCalendarAsync(request, cancellationToken)).ToActionResult();
 }

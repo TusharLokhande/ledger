@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/authStore";
 import { TransactionFormSheet } from "@/features/transactions";
 import { homeKeys } from "@/features/home/hooks/queries/homeKeys";
 import { useHome } from "@/features/home/hooks/queries/useHome";
+import { DayByDayCard } from "@/features/home/components/DayByDayCard";
 import { HomeTiles } from "@/features/home/components/HomeTiles";
 import { MonthPicker } from "@/features/home/components/MonthPicker";
 import { RecentTransactions } from "@/features/home/components/RecentTransactions";
@@ -53,6 +54,7 @@ export function HomePage() {
           {home ? (
             <>
               <SpendingChartCard home={home} />
+              <DayByDayCard month={month} />
               <RecentTransactions transactions={home.recent} />
             </>
           ) : (

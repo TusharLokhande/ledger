@@ -2,6 +2,8 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/ui/skeleton";
 import { MetricTile } from "@/components/MetricTile";
+import { HideIncomeToggle } from "@/components/HideIncomeToggle";
+import { HIDDEN_AMOUNT, usePrivacyStore } from "@/store/privacyStore";
 import { money, pctChange, savingsRate } from "@/features/reports";
 import type { Home } from "@/features/home/types/home.types";
 
@@ -23,6 +25,7 @@ function Change({ current, usual, upIsGood, suffix = "vs usual" }: { current: nu
 }
 
 export function HomeTiles({ home }: { home?: Home }) {
+  const hideIncome = usePrivacyStore((s) => s.hideIncome);
   if (!home) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -38,9 +41,14 @@ export function HomeTiles({ home }: { home?: Home }) {
 
   const rate = savingsRate(home.income, home.expenses);
   const n = home.investedAccounts;
+  const fund = home.emergencyFund;
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 [&>div]:rounded-xl [&>div]:border [&>div]:border-border [&>div]:bg-card [&>div]:p-3 [&>div]:shadow-card">
-      <MetricTile label="Income" value={money(home.income)}>
+    <div className={cn("grid gap-3 sm:grid-cols-2", fund ? "lg:grid-cols-3 xl:grid-cols-5" : "lg:grid-cols-4", "[&>div]:rounded-xl [&>div]:border [&>div]:border-border [&>div]:bg-card [&>div]:p-3 [&>div]:shadow-card")}>
+      <MetricTile
+        label="Income"
+        value={hideIncome ? HIDDEN_AMOUNT : money(home.income)}
+        action={<HideIncomeToggle />}
+      >
         <Change current={home.income} usual={home.usualIncome} upIsGood />
       </MetricTile>
       <MetricTile label="Spent" value={money(home.expenses)}>
@@ -51,6 +59,14 @@ export function HomeTiles({ home }: { home?: Home }) {
           {home.invested === 0 ? "Nothing invested yet" : `to ${n} investment account${n === 1 ? "" : "s"}`}
         </span>
       </MetricTile>
+      {fund && (
+        <MetricTile label="Emergency fund" value={money(fund.saved)} valueClassName={fund.saved < 0 ? "text-destructive" : undefined}>
+          <span className="text-success">+{money(fund.added)} added</span>
+          <span className="text-muted-foreground"> · </span>
+          <span className={fund.used > 0 ? "text-destructive" : "text-muted-foreground"}>{money(fund.used)} used</span>
+          <span className="text-muted-foreground"> this month</span>
+        </MetricTile>
+      )}
       <MetricTile label="Savings rate" value={rate === null ? "—" : `${rate.toFixed(0)}%`} valueClassName={rate !== null && rate < 0 ? "text-destructive" : undefined}>
         <span className="text-muted-foreground">(income − spent) ÷ income</span>
       </MetricTile>

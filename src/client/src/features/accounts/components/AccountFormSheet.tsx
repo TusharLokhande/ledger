@@ -1,20 +1,19 @@
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
-import { SegmentedControl } from "@/components/SegmentedControl";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/ui/sheet";
 import type { ApiError } from "@/types/apiError.types";
 import { ErrorStatus } from "@/types/errorStatus.enum";
 import { accountFormSchema } from "@/features/accounts/schemas/account.schema";
 import type { AccountDto, AccountFormValues } from "@/features/accounts/types/account.types";
-import { accountTypeOptions } from "@/features/accounts/constants/accountTypes";
+import { AccountTypePicker } from "@/features/accounts/components/AccountTypePicker";
 import { useCreateAccount } from "@/features/accounts/hooks/mutations/useCreateAccount";
 import { useUpdateAccount } from "@/features/accounts/hooks/mutations/useUpdateAccount";
 
-const emptyValues: AccountFormValues = { name: "", accountType: "Bank", institution: "" };
+const emptyValues: AccountFormValues = { name: "", accountType: "Bank", institution: "", openingBalance: Number.NaN };
 
 interface AccountFormSheetProps {
   open: boolean;
@@ -48,11 +47,15 @@ function AccountForm({ account, onDone }: { account?: AccountDto | null; onDone:
   } = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
     defaultValues: account
-      ? { name: account.name, accountType: account.accountType, institution: account.institution ?? "" }
+      ? { name: account.name, accountType: account.accountType, institution: account.institution ?? "", openingBalance: account.openingBalance ?? Number.NaN }
       : emptyValues,
   });
 
-  const onSubmit = handleSubmit((values) => {
+  const isFund = useWatch({ control, name: "accountType" }) === "EmergencyFund";
+
+  const onSubmit = handleSubmit((form) => {
+    // Only an emergency fund keeps an opening balance; blank or another type sends 0, which the server stores as none.
+    const values = { ...form, openingBalance: isFund && !Number.isNaN(form.openingBalance) ? form.openingBalance : 0 };
     const options = {
       onSuccess: () => {
         toast.success(isEdit ? "Account updated." : "Account added.");
@@ -101,10 +104,39 @@ function AccountForm({ account, onDone }: { account?: AccountDto | null; onDone:
             control={control}
             name="accountType"
             render={({ field }) => (
-              <SegmentedControl label="Type" value={field.value} options={[...accountTypeOptions]} onChange={field.onChange} />
+              <AccountTypePicker value={field.value} onChange={field.onChange} />
             )}
           />
         </div>
+
+        {isFund && (
+          <div className="grid gap-1.5">
+            <Label htmlFor="account-opening">
+              Already saved <span className="font-normal text-muted-foreground">(optional)</span>
+            </Label>
+            <Input
+              id="account-opening"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="any"
+              className="h-9 tabular-nums"
+              placeholder="0"
+              aria-invalid={!!errors.openingBalance}
+              aria-describedby={errors.openingBalance ? "account-opening-error" : "account-opening-hint"}
+              {...register("openingBalance", { valueAsNumber: true })}
+            />
+            {errors.openingBalance ? (
+              <p id="account-opening-error" className="text-xs text-destructive">
+                {errors.openingBalance.message}
+              </p>
+            ) : (
+              <p id="account-opening-hint" className="text-xs text-muted-foreground">
+                What was in this fund before you started tracking. Counts toward your total saved on Home.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="grid gap-1.5">
           <Label htmlFor="account-institution">
