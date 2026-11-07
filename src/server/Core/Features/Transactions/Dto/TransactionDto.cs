@@ -17,4 +17,5 @@ public class TransactionDto
     public string? CategoryIcon { get; set; }
     public string? CategoryColor { get; set; }
     public string? Note { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 }

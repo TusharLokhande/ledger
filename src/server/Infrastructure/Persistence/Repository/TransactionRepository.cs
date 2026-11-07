@@ -38,6 +38,7 @@ public class TransactionRepository : Repository<Transactions>, ITransactionRepos
         CategoryIcon = t.Category != null ? t.Category.Icon : null,
         CategoryColor = t.Category != null ? t.Category.Color : null,
         Note = t.Note,
+        CreatedAtUtc = t.CreatedAtUtc,
     };
 
     public TransactionRepository(AppDbContext context) : base(context)
@@ -50,9 +51,12 @@ public class TransactionRepository : Repository<Transactions>, ITransactionRepos
         var query = Filtered(userId, range.From, range.To, request.Filters);
 
         var desc = !string.Equals(request.Sorting?.Direction, "asc", StringComparison.OrdinalIgnoreCase);
-        var ordered = request.Sorting?.Field == "amount"
-            ? (desc ? query.OrderByDescending(t => t.Amount) : query.OrderBy(t => t.Amount))
-            : (desc ? query.OrderByDescending(t => t.TransactionDate) : query.OrderBy(t => t.TransactionDate));
+        var ordered = request.Sorting?.Field switch
+        {
+            "amount" => desc ? query.OrderByDescending(t => t.Amount) : query.OrderBy(t => t.Amount),
+            "createdAtUtc" => desc ? query.OrderByDescending(t => t.CreatedAtUtc) : query.OrderBy(t => t.CreatedAtUtc),
+            _ => desc ? query.OrderByDescending(t => t.TransactionDate) : query.OrderBy(t => t.TransactionDate),
+        };
 
         // Newest entry first within a day; Id keeps paging stable.
         return ordered.ThenByDescending(t => t.CreatedAtUtc).ThenBy(t => t.Id)

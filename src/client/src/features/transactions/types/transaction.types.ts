@@ -20,6 +20,8 @@ export interface TransactionDto {
   categoryIcon: string | null;
   categoryColor: string | null;
   note: string | null;
+  /** ISO timestamp (UTC) of when the entry was recorded. */
+  createdAtUtc: string;
 }
 
 /** Mirrors backend SaveTransactionRequest. */

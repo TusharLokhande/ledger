@@ -98,6 +98,15 @@ export function getTransactionColumns({ accountOptions, categoryOptions, onEdit,
       cell: ({ row }) => <AmountCell transaction={row.original} />,
     },
     {
+      id: "createdAtUtc",
+      accessorKey: "createdAtUtc",
+      header: "Created at",
+      meta: { label: "Created at" },
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap text-muted-foreground">{format(parseISO(row.original.createdAtUtc), "d MMM yyyy, h:mm a")}</span>
+      ),
+    },
+    {
       id: "actions",
       header: () => <span className="sr-only">Actions</span>,
       enableSorting: false,
